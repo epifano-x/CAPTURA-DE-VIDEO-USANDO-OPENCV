@@ -28,42 +28,36 @@ def mostrar_cor_rgb(event):
     # Atualizar a label com a cor RGB
     rgb_label.config(text=cor_rgb)
 
-    # Atualizar a cor do quadrado
-    #quadrado_cor_label.config(bg=f"#{pixel[0]:02X}{pixel[1]:02X}{pixel[2]:02X}")
-
     # Aplicar a cor na imagem editada
     imagem_editada[y, x] = pixel
     img_editada = ImageTk.PhotoImage(Image.fromarray(imagem_editada))
     label_imagem_editada.config(image=img_editada)
     label_imagem_editada.image = img_editada
 
+# Função para aplicar os filtros com base nos valores das Trackbars
+def aplicar_filtros(_=None):
+    valor_media = int(float(filtro_media_var.get()))
+    valor_threshold = int(float(filtro_threshold_var.get()))
 
-# Função para aplicar o filtro passa-baixa média na imagem editada
-def aplicar_filtro_media(val):
-    valor = int(float(val))
-    kernel = np.ones((valor, valor), dtype=np.float32) / (valor * valor)
-    img_filtrada = cv2.filter2D(imagem_original_cv2, -1, kernel)
-    imagem_editada_cv2[:] = img_filtrada[:]
+    # Aplicar filtro passa-baixa média
+    kernel_media = np.ones((valor_media, valor_media), dtype=np.float32) / (valor_media * valor_media)
+    img_filtrada_media = cv2.filter2D(imagem_original_cv2, -1, kernel_media)
+
+    # Aplicar filtro de threshold apenas se o valor do threshold for maior que 1
+    if valor_threshold > 1:
+        _, img_filtrada_threshold = cv2.threshold(img_filtrada_media, valor_threshold, 255, cv2.THRESH_BINARY)
+        imagem_editada_cv2[:] = img_filtrada_threshold[:]
+    else:
+        # Se o valor do threshold for 1 ou menor, não aplicar o threshold
+        imagem_editada_cv2[:] = img_filtrada_media[:]
 
     img_editada = ImageTk.PhotoImage(Image.fromarray(imagem_editada_cv2))
     label_imagem_editada.config(image=img_editada)
     label_imagem_editada.image = img_editada
 
-# Função para aplicar o filtro de threshold na imagem editada
-def aplicar_filtro_threshold(val):
-    valor = int(float(val))
-    _, img_filtrada = cv2.threshold(imagem_original_cv2, valor, 255, cv2.THRESH_BINARY)
-    imagem_editada_cv2[:] = img_filtrada[:]
-
-    img_editada = ImageTk.PhotoImage(Image.fromarray(imagem_editada_cv2))
-    label_imagem_editada.config(image=img_editada)
-    label_imagem_editada.image = img_editada
-
-
-# Carregar a imagem capturada
+# Carregar a imagem capturada (substitua pelo caminho correto)
 imagem_capturada = Image.open("imagem_capturada_webcam.jpg")
 imagem_original_cv2 = np.array(imagem_capturada)
-
 
 # Criar uma cópia da imagem capturada para a imagem editada
 imagem_editada = np.array(imagem_capturada)
@@ -117,12 +111,12 @@ frame_trackbar.pack(side="top")
 ttk.Label(frame_trackbar, text="Filtro Média").pack(side="top")
 filtro_media_var = tk.StringVar()
 filtro_media_var.set("1")  # Valor inicial
-ttk.Scale(frame_trackbar, from_=1, to=20, variable=filtro_media_var, command=aplicar_filtro_media).pack(side="top")
+ttk.Scale(frame_trackbar, from_=1, to=20, variable=filtro_media_var, command=aplicar_filtros).pack(side="top")
 
 # Trackbar para filtro de threshold
 ttk.Label(frame_trackbar, text="Filtro Threshold").pack(side="top")
 filtro_threshold_var = tk.StringVar()
 filtro_threshold_var.set("1")  # Valor inicial
-ttk.Scale(frame_trackbar, from_=1, to=255, variable=filtro_threshold_var, command=aplicar_filtro_threshold).pack(side="top")
+ttk.Scale(frame_trackbar, from_=1, to=255, variable=filtro_threshold_var, command=aplicar_filtros).pack(side="top")
 
 root.mainloop()
