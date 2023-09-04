@@ -13,7 +13,13 @@ def atualizar_coordenadas(event):
 # Função para mostrar a cor RGB e atualizar a imagem editada
 def mostrar_cor_rgb(event):
     x, y = event.x, event.y
-    pixel = imagem_capturada[y, x]  # Obtenha o pixel da imagem capturada
+    
+    # Converter a imagem capturada para uma matriz numpy
+    imagem_capturada_np = np.array(imagem_capturada)
+    
+    # Obter o pixel da imagem capturada
+    pixel = imagem_capturada_np[y, x]
+    
     cor_rgb = f"RGB: {pixel[0]}, {pixel[1]}, {pixel[2]}"
     
     # Atualizar a label com as coordenadas
@@ -23,7 +29,7 @@ def mostrar_cor_rgb(event):
     rgb_label.config(text=cor_rgb)
 
     # Atualizar a cor do quadrado
-    quadrado_cor_label.config(bg=f"#{pixel[0]:02X}{pixel[1]:02X}{pixel[2]:02X}")
+    #quadrado_cor_label.config(bg=f"#{pixel[0]:02X}{pixel[1]:02X}{pixel[2]:02X}")
 
     # Aplicar a cor na imagem editada
     imagem_editada[y, x] = pixel
@@ -31,11 +37,12 @@ def mostrar_cor_rgb(event):
     label_imagem_editada.config(image=img_editada)
     label_imagem_editada.image = img_editada
 
+
 # Função para aplicar o filtro passa-baixa média na imagem editada
 def aplicar_filtro_media(val):
     valor = int(float(val))
     kernel = np.ones((valor, valor), dtype=np.float32) / (valor * valor)
-    img_filtrada = cv2.filter2D(imagem_editada, -1, kernel)
+    img_filtrada = cv2.filter2D(imagem_original_cv2, -1, kernel)
     imagem_editada_cv2[:] = img_filtrada[:]
 
     img_editada = ImageTk.PhotoImage(Image.fromarray(imagem_editada_cv2))
@@ -45,15 +52,18 @@ def aplicar_filtro_media(val):
 # Função para aplicar o filtro de threshold na imagem editada
 def aplicar_filtro_threshold(val):
     valor = int(float(val))
-    _, img_filtrada = cv2.threshold(imagem_editada, valor, 255, cv2.THRESH_BINARY)
+    _, img_filtrada = cv2.threshold(imagem_original_cv2, valor, 255, cv2.THRESH_BINARY)
     imagem_editada_cv2[:] = img_filtrada[:]
 
     img_editada = ImageTk.PhotoImage(Image.fromarray(imagem_editada_cv2))
     label_imagem_editada.config(image=img_editada)
     label_imagem_editada.image = img_editada
 
+
 # Carregar a imagem capturada
 imagem_capturada = Image.open("imagem_capturada_webcam.jpg")
+imagem_original_cv2 = np.array(imagem_capturada)
+
 
 # Criar uma cópia da imagem capturada para a imagem editada
 imagem_editada = np.array(imagem_capturada)
