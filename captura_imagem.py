@@ -85,6 +85,11 @@ def reverter_imagem():
     label_imagem_editada.image = img_editada
     binarizar_var.set(0)  # Desabilitar a binarização ao reverter a imagem
 
+# Função para salvar a imagem editada na raiz
+def salvar_imagem():
+    cv2.imwrite("imagem_editada.jpg", imagem_editada_cv2)
+    print("Imagem editada salva como imagem_editada.jpg")
+
 # Carregar a imagem capturada (substitua pelo caminho correto)
 imagem_capturada = Image.open("imagem_capturada_webcam.jpg")
 imagem_original_cv2 = np.array(imagem_capturada)
@@ -162,5 +167,9 @@ binarizar_checkbox.pack(side="top")
 # Botão para reverter as alterações e mostrar a imagem original
 reverter_button = ttk.Button(frame_trackbar, text="Reverter", command=reverter_imagem)
 reverter_button.pack(side="top")
+
+# Botão para salvar a imagem editada na raiz
+salvar_button = ttk.Button(frame_trackbar, text="Salvar Imagem", command=salvar_imagem)
+salvar_button.pack(side="top")
 
 root.mainloop()
